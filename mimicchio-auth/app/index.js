@@ -18,10 +18,7 @@ app.get('/me', (req, res) => {
   }
 
   // K8s vuole il token in un header di risposta non nel body
-  res.header('Authorization', 'HelloooooooToken' ).json({
-    access_token: 'Bearer hellooooooo_access_token',
-    token: 'Bearer hellooooooo_token',
-  })
+  res.header('Authorization', 'HelloooooooToken' ).status(204).send()
 })
 
 app.listen(port, () => {
