@@ -1,0 +1,131 @@
+#
+# Ingress definitions
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: m-auth-rules
+  annotations:
+    # use the shared ingress-nginx
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /me
+            pathType: Prefix
+            backend:
+              service: 
+                name: mimicchio-auth-service
+                port:
+                  name: ms2-port
+---
+#
+# Ingress Base definitions
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mimicchio-rules
+  annotations:
+    # use the shared ingress-nginx
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/auth-url: "http://$host/me"
+    nginx.ingress.kubernetes.io/auth-response-headers: Authorization
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mimicchio1-service
+                port:
+                  name: ms1-port
+#
+# Deployments Definitions Mimicchio 1
+#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimicchio1-deployment
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: mimicchio1
+  template:
+    metadata:
+      labels:
+        app: mimicchio1
+    spec:
+      containers:
+      - name: k8s-mimicchio1
+        image: mts88/mimicchio-1:1.0.2
+        ports:
+          - name: mimicchio1-port
+            containerPort: 3000
+---
+#
+# Service definition (exposing)
+#
+apiVersion: v1
+kind: Service
+metadata: 
+  name: mimicchio1-service
+spec:
+  ports:
+    - name: ms1-port
+      port: 31001
+      nodePort: 31001
+      targetPort: mimicchio1-port
+      protocol: TCP
+  selector:
+    app: mimicchio1
+  type: NodePort
+#
+# Deployments Definitions Sample2
+#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimicchio-auth-deployment
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: mimicchio-auth
+  template:
+    metadata:
+      labels:
+        app: mimicchio-auth
+    spec:
+      containers:
+      - name: k8s-mimicchio-auth
+        image: mts88/mimicchio-auth:1.0.5
+        ports:
+          - name: m-auth-port
+            containerPort: 3001
+---
+#
+# Service definition Sample2 (exposing)
+#
+apiVersion: v1
+kind: Service
+metadata: 
+    name: mimicchio-auth-service
+spec:
+    ports:
+        - name: ms2-port
+          port: 31002
+          nodePort: 31002
+          targetPort: m-auth-port
+          protocol: TCP
+    selector:
+        app: mimicchio-auth
+    type: NodePort
