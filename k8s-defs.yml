@@ -52,7 +52,17 @@ spec:
                 name: mimicchio-auth-service
                 port:
                   name: ms2-port
-
+---
+#
+# Secrets definitions
+#
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mimicchio-jwt-token-secret
+type: Opaque
+data:
+  password: MDlmMjZlNDAyNTg2ZTJmYWE4ZGE0Yzk4YTM1ZjFiMjBkNmIwMzNjNjA5N2JlZmE4YmUzNDg2YTgyOTU4N2ZlMmY5MGE4MzJiZDNmZjlkNDI3MTBhNGRhMDk1YTJjZTI4NWIwMDlmMGMzNzMwY2Q5YjhlMWFmM2ViODRkZjY2MTE=
 #
 # Deployments Definitions Mimicchio 1
 #
@@ -73,7 +83,7 @@ spec:
     spec:
       containers:
       - name: k8s-mimicchio1
-        image: mts88/mimicchio-1:1.0.2
+        image: mts88/mimicchio-1:1.0.3
         ports:
           - name: mimicchio1-port
             containerPort: 3000
@@ -82,6 +92,12 @@ spec:
             cpu: 500m
           requests:
             cpu: 200m
+        env:
+          - name: TOKEN_SECRET
+            valueFrom:
+                secretKeyRef:
+                  name: mimicchio-jwt-token-secret
+                  key: password
 ---
 #
 # Service definition (exposing)
@@ -141,7 +157,7 @@ spec:
     spec:
       containers:
       - name: k8s-mimicchio-auth
-        image: mts88/mimicchio-auth:1.0.7
+        image: mts88/mimicchio-auth:1.0.8
         ports:
           - name: m-auth-port
             containerPort: 3001
@@ -150,6 +166,12 @@ spec:
             cpu: 500m
           requests:
             cpu: 200m
+        env:
+          - name: TOKEN_SECRET
+            valueFrom:
+                secretKeyRef:
+                  name: mimicchio-jwt-token-secret
+                  key: password
 ---
 #
 # Service definition Sample2 (exposing)

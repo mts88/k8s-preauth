@@ -1,4 +1,5 @@
 const express = require('express')
+const jwt = require("jsonwebtoken");
 
 const app = express()
 const port = 3001
@@ -17,8 +18,21 @@ app.get('/me', (req, res) => {
     }
   }
 
+  const token = jwt.sign( {
+    username: 'mimicchio',
+    authorities: [
+      'hello',
+      'world'
+    ]
+  }, process.env.TOKEN_SECRET, { 
+    expiresIn: `${24*3600}s`,
+    notBefore: 0
+  });
+
   // K8s vuole il token in un header di risposta non nel body
-  res.header('Authorization', 'HelloooooooToken' ).status(204).send()
+  res.header('Authorization', token).status(200).send({
+    token
+  })
 })
 
 app.get('/user', (req, res) => {
