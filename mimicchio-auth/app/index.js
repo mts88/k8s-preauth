@@ -21,6 +21,12 @@ app.get('/me', (req, res) => {
   res.header('Authorization', 'HelloooooooToken' ).status(204).send()
 })
 
+app.get('/user', (req, res) => {
+  res.json({
+    foo: 'bar'
+  })
+})
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })

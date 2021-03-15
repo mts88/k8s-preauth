@@ -45,6 +45,14 @@ spec:
                 name: mimicchio1-service
                 port:
                   name: ms1-port
+          - path: /auth(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service: 
+                name: mimicchio-auth-service
+                port:
+                  name: ms2-port
+
 #
 # Deployments Definitions Mimicchio 1
 #
@@ -133,7 +141,7 @@ spec:
     spec:
       containers:
       - name: k8s-mimicchio-auth
-        image: mts88/mimicchio-auth:1.0.6
+        image: mts88/mimicchio-auth:1.0.7
         ports:
           - name: m-auth-port
             containerPort: 3001
