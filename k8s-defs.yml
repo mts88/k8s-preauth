@@ -45,6 +45,13 @@ spec:
                 name: mimicchio1-service
                 port:
                   name: ms1-port
+          - path: /ms2(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: mimicchio2-service
+                port:
+                  name: ms2-port
           - path: /auth(/|$)(.*)
             pathType: Prefix
             backend:
@@ -109,7 +116,7 @@ metadata:
 spec:
   ports:
     - name: ms1-port
-      port: 3000
+      port: 3100
       targetPort: mimicchio1-port
       protocol: TCP
   selector:
@@ -128,6 +135,80 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: mimicchio1
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+#
+# Deployments Definitions Mimicchio 2 Kotlin
+#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimicchio2-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mimicchio2
+  template:
+    metadata:
+      labels:
+        app: mimicchio2
+    spec:
+      containers:
+      - name: k8s-mimicchio2
+        image: mts88/mimicchio-2:1.0.2
+        ports:
+          - name: mimicchio2-port
+            containerPort: 8086
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+        env:
+          - name: TOKEN_SECRET
+            valueFrom:
+                secretKeyRef:
+                  name: mimicchio-jwt-token-secret
+                  key: password
+---
+#
+# Service definition (exposing)
+#
+apiVersion: v1
+kind: Service
+metadata: 
+  name: mimicchio2-service
+spec:
+  ports:
+    - name: ms2-port
+      port: 3186
+      targetPort: mimicchio2-port
+      protocol: TCP
+  selector:
+    app: mimicchio2
+  type: ClusterIP
+#
+# Mimicchio 1 Service autoscaler
+#
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mimicchio2-autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mimicchio2
   minReplicas: 1
   maxReplicas: 3
   metrics:
@@ -183,7 +264,7 @@ metadata:
 spec:
     ports:
         - name: ms2-port
-          port: 3001
+          port: 3101
           targetPort: m-auth-port
           protocol: TCP
     selector:

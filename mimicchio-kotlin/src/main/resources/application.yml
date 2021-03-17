@@ -1,0 +1,4 @@
+server:
+  port: 8086
+jwt:
+  secret: ${TOKEN_SECRET}

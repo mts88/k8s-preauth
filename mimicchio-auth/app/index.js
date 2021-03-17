@@ -18,16 +18,15 @@ app.get('/me', (req, res) => {
     }
   }
 
+  console.log(process.env.TOKEN_SECRET)
+
   const token = jwt.sign( {
     username: 'mimicchio',
     authorities: [
       'hello',
       'world'
     ]
-  }, process.env.TOKEN_SECRET, { 
-    expiresIn: `${24*3600}s`,
-    notBefore: 0
-  });
+  }, process.env.TOKEN_SECRET);
 
   // K8s vuole il token in un header di risposta non nel body
   res.header('Authorization', token).status(200).send({
