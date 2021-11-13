@@ -28,7 +28,7 @@ app.get('/me', (req, res) => {
     ]
   }, process.env.TOKEN_SECRET);
 
-  // K8s vuole il token in un header di risposta non nel body
+  // K8s Ingress wants token in header response not in body
   res.header('Authorization', token).status(200).send({
     token
   })
