@@ -35,7 +35,7 @@ class JwtTokenFilter: OncePerRequestFilter() {
                                   response: HttpServletResponse,
                                   chain: FilterChain) {
 
-        // Ovviamente stammerda vuole sto trick del cavolo
+        // Decoding with ByteArray to avoid packaging problems
         val parsedSecret = jwtConfiguration.secret?.toByteArray(charset("UTF-8"))
 
         try {
